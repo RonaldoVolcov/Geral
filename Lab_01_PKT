@@ -1,0 +1,56 @@
+# CONFIG SP
+
+enable
+conf t
+hostname sao_paulo
+enable password cisco
+int g0/0
+ip address 10.0.0.1 255.0.0.0
+no shut
+int s0/3/0
+ip address 200.200.200.1 255.0.0.0
+clock rate 64000
+no shut
+router rip
+network 10.0.0.0
+network 200.200.200.0
+
+
+# CONFIG RJ
+
+enable
+conf t
+hostname rio_janeiro
+enable password cisco
+int g0/0
+ip address 172.16.0.1 255.255.0.0
+no shut
+int s0/3/1
+ip address 200.200.200.2 255.255.255.0
+no shut
+int s0/3/0
+ip address 210.210.210.1 255.255.255.0
+clock rate 64000
+no shut
+router rip
+network 172.16.0.0
+network 200.200.200.0
+network 210.210.210.0
+
+##CONFIG MG
+
+enable
+conf t
+hostname minas_gerais
+enable password cisco
+int g0/0
+ip address 192.168.100.1 255.255.255.0
+no shut
+int s0/3/1
+ip address 210.210.210.2 255.255.255.0
+clock rate 64000
+no shut
+router rip
+network 192.168.100.0
+network 200.200.200.0
+network 210.210.210.0
