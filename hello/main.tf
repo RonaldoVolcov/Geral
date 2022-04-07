@@ -192,7 +192,7 @@ resource "aws_instance" "node_a" {
     ami                    = "ami-0c02fb55956c7d316"
     instance_type          = "t2.micro"
     subnet_id              = aws_subnet.Work_Public_Subnet.id
-    vpc_security_group_ids = [aws_security_group.Work_Security_Group.id]
+    vpc_security_group_ids = [aws_security_group.Work_Nagios_Security_Group.id]
     user_data = <<-EOF
         #!/bin/bash
         # NCPA Agent Install instructions
@@ -209,7 +209,7 @@ resource "aws_instance" "node_a" {
         service snmpd restart
         echo done > /tmp/snmp-agent.done
 	EOF
-    
+
     tags = {
         Name = "node_a"
     }
