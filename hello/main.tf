@@ -90,10 +90,10 @@ resource "aws_route_table_association" "Assoc_1" {
 #Grupos de Segurança#
 #####################
 
-resource "aws_security_group" "Work_Security_Group" {
+resource "aws_security_group" "Work_Nagios_Security_Group" {
 
-    name        = "Work_Security_Group"
-    description = "Work Security Group"
+    name        = "Work_Nagios_Security_Group"
+    description = "Grupos de Seguranca do Nagios"
     vpc_id      = aws_vpc.Work_VPC.id
     
     egress {
@@ -134,11 +134,11 @@ resource "aws_security_group" "Work_Security_Group" {
 }
 
 # EC2 INSTANCE NAGIOS
-resource "aws_instance" "nagios-instance" {
+resource "aws_instance" "nagios" {
     ami                    = "ami-0c02fb55956c7d316"
     instance_type          = "t2.micro"
     subnet_id              = aws_subnet.Work_Public_Subnet.id
-    vpc_security_group_ids = [aws_security_group.Work_Security_Group.id]
+    vpc_security_group_ids = [aws_security_group.Work_Nagios_Security_Group.id]
     user_data              = <<-EOF
    #!/bin/bash
         # Security-Enhanced Linux
@@ -182,20 +182,36 @@ resource "aws_instance" "nagios-instance" {
 	EOF
 
     tags = {
-        Name = "nagios-instance"
+        Name = "nagios"
     }
 
 }    
 
 # EC2 INSTANCE Node_A
-resource "aws_instance" "node_a-instance" {
+resource "aws_instance" "node_a" {
     ami                    = "ami-0c02fb55956c7d316"
     instance_type          = "t2.micro"
     subnet_id              = aws_subnet.Work_Public_Subnet.id
     vpc_security_group_ids = [aws_security_group.Work_Security_Group.id]
-
+    user_data = <<-EOF
+        #!/bin/bash
+        # NCPA Agent Install instructions
+        # https://assets.nagios.com/downloads/ncpa/docs/Installing-NCPA.pdf
+        yum update -y
+        rpm -Uvh https://assets.nagios.com/downloads/ncpa/ncpa-latest.el7.x86_64.rpm
+        systemctl restart ncpa_listener.service
+        echo done > /tmp/ncpa-agent.done
+        # SNMP Agent install instructions
+        # https://www.site24x7.com/help/admin/adding-a-monitor/configuring-snmp-linux.html
+        yum update -y
+        yum install net-snmp -y
+        echo "rocommunity public" >> /etc/snmp/snmpd.conf
+        service snmpd restart
+        echo done > /tmp/snmp-agent.done
+	EOF
+    
     tags = {
-        Name = "node_a-instance"
+        Name = "node_a"
     }
 
 }
