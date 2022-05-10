@@ -1,4 +1,4 @@
-r#################
+#################
 #Config Provider#
 #################
 
@@ -23,12 +23,12 @@ provider "aws" {
 #Criação da Work VPC#
 #####################
 
-resource "aws_vpc" "Work_VPC" {
+resource "aws_vpc" "vpc10" {
     cidr_block           = "10.0.0.0/16"
     enable_dns_hostnames = "true"
 
     tags = {
-        Name = "Work VPC"  
+        Name = "VPC 10"  
     }
 }
 
@@ -36,28 +36,68 @@ resource "aws_vpc" "Work_VPC" {
 #Criação Internet Gateway#
 ##########################
 
-resource "aws_internet_gateway" "Work_IGW" {
+resource "aws_internet_gateway" "igw_vpc10" {
     vpc_id = aws_vpc.Work_VPC.id
 
     tags = {
-        Name = "Work IGW"
+        Name = "IGW VPC 10"
     }
 }
 
-################
-#Criação Subnet#
-################
+#########################
+#Criação Subnet Publicas#
+#########################
 
-resource "aws_subnet" "Work_Public_Subnet" {
+resource "aws_subnet" "sn_vpc10_pub_1a" {
     vpc_id                  = aws_vpc.Work_VPC.id
-    cidr_block              = "10.0.0.0/24"
+    cidr_block              = "10.0.1.0/24"
     map_public_ip_on_launch = "true"
     availability_zone       = "us-east-1a"
 
     tags = {
-        Name = "Work Public Subnet"
+        Name = "Public Subnet East 1A"
     }
 }
+
+resource "aws_subnet" "sn_vpc10_pub_1c" {
+    vpc_id                  = aws_vpc.Work_VPC.id
+    cidr_block              = "10.0.2.0/24"
+    map_public_ip_on_launch = "true"
+    availability_zone       = "us-east-1c"
+
+    tags = {
+        Name = "Public Subnet East 1C"
+    }
+}
+
+
+########################
+#Criação Subnet Privada#
+########################
+
+resource "aws_subnet" "sn_vpc10_priv_1a" {
+    vpc_id                  = aws_vpc.Work_VPC.id
+    cidr_block              = "10.0.3.0/24"
+    map_public_ip_on_launch = "true"
+    availability_zone       = "us-east-1a"
+
+    tags = {
+        Name = "Private Subnet East 1A"
+    }
+}
+
+resource "aws_subnet" "sn_vpc10_priv_1c" {
+    vpc_id                  = aws_vpc.Work_VPC.id
+    cidr_block              = "10.0.4.0/24"
+    map_public_ip_on_launch = "true"
+    availability_zone       = "us-east-1c"
+
+    tags = {
+        Name = "Private Subnet East 1C"
+    }
+}
+
+
 
 #####################
 #Criação Route Table#
