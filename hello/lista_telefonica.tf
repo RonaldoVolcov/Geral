@@ -1,6 +1,15 @@
-#################
-#Config Provider#
-#################
+/*
+Autor: Ronaldo Euclides Volcov RM84422 - Checkpoint 02
+*/
+
+#########################################################################    
+                #CONFIGURAÇÃO PROVIDER/REGIÃO#
+#########################################################################
+
+
+#####################
+#Config Provider AWS#
+#####################
 
 terraform {
   required_providers {
@@ -11,13 +20,18 @@ terraform {
   }
 }
 
-###############
-#Config Região#
-###############
+#############################
+#Config Região e Credenciais#
+#############################
 
 provider "aws" {
     region = "us-east-1"
     shared_credentials_file = ".aws/credentials"
+
+
+#########################################################################    
+                        #CONFIGURAÇÃO DA REDE#
+#########################################################################
 }
 #####################
 #Criação da Work VPC#
@@ -28,7 +42,7 @@ resource "aws_vpc" "vpc10" {
     enable_dns_hostnames = "true"
 
     tags = {
-        Name = "Name VPC 10"  
+        Name = "vpc10"  
     }
 }
 
@@ -40,17 +54,17 @@ resource "aws_internet_gateway" "igw_vpc10" {
     vpc_id = aws_vpc.vpc10.id
 
     tags = {
-        Name = "Internet Gateway VPC 10"
+        Name = "igw_vpc10"
     }
 }
 
 #########################################################################    
-                #FORMATION OF PRIVATE AND PUBLIC SUBNETS#
+                #CRIAÇÃO DAS SUBNETES PRIVADA E PUBLICA#
 #########################################################################
 
-######################
-#CREATE PUBLIC SUBNET#
-######################
+###########################
+#Criação da Subnet Publica#
+###########################
 
 resource "aws_subnet" "sn_vpc10_pub_1a" {
     vpc_id                  = aws_vpc.vpc10.id
@@ -59,7 +73,7 @@ resource "aws_subnet" "sn_vpc10_pub_1a" {
     availability_zone       = "us-east-1a" ##AZ
 
     tags = {
-        Name = "Public Subnet East 1A" 
+        Name = "sn_vpc10_pub_1a" 
     }
 }
 
@@ -70,18 +84,13 @@ resource "aws_subnet" "sn_vpc10_pub_1c" {
     availability_zone       = "us-east-1c" ##AZ
 
     tags = {
-        Name = "Public Subnet East 1C"
+        Name = "sn_vpc10_pub_1c"
     }
 }
 
-#########################################################################    
-                #FORMATION OF PRIVATE AND PUBLIC SUBNETS#
-#########################################################################
-
-
-#######################
-#CREATE PRIVATE SUBNET#
-#######################
+###########################
+#Criação da Subnet Privada#
+###########################
 
 resource "aws_subnet" "sn_vpc10_priv_1a" {
     vpc_id                  = aws_vpc.vpc10.id
@@ -90,7 +99,7 @@ resource "aws_subnet" "sn_vpc10_priv_1a" {
     availability_zone       = "us-east-1a" ##AZ
 
     tags = {
-        Name = "Private Subnet East 1A"
+        Name = "sn_vpc10_priv_1a"
     }
 }
 
@@ -101,17 +110,17 @@ resource "aws_subnet" "sn_vpc10_priv_1c" {
     availability_zone       = "us-east-1c" ##AZ
 
     tags = {
-        Name = "Private Subnet East 1C"
+        Name = "sn_vpc10_priv_1c"
     }
 }
 
 #########################################################################    
-                #FORMATION OF ROUTE TABLES SUBNETS#
+                #CONFIGURAÇÃO DAS TABELAS DE ROTEAMENTO#
 #########################################################################
 
-###########################
-#CREATE PUBLIC ROUTE TABLE#
-###########################
+##############################################
+#Criação da tabela de roteamento Rede Publica#
+##############################################
 
 resource "aws_route_table" "Public_Route_Table" {
     vpc_id = aws_vpc.vpc10.id
@@ -122,25 +131,25 @@ resource "aws_route_table" "Public_Route_Table" {
     }
 
     tags = {
-        Name = "Public Route Table"
+        Name = "Public_Route_Table"
     }
 }
 
-############################
-#CREATE PRIVATE ROUTE TABLE#
-############################
+##############################################
+#Criação da tabela de roteamento Rede Privada#
+##############################################
 
 resource "aws_route_table" "Private_Route_Table" {
     vpc_id = aws_vpc.vpc10.id
 
     tags = {
-        Name = "Private Route Table"
+        Name = "Private_Route_Table"
     }
 }
 
-#############################
-#Associação da Public Subnet#
-#############################
+################################################
+#Associação Tabela de Roteamento a Rede Publica#
+################################################
 
 resource "aws_route_table_association" "Assoc_1_Pub_a" {
 
@@ -156,9 +165,9 @@ resource "aws_route_table_association" "Assoc_1_Pub_c" {
 
 }
 
-##############################
-#Associação da Private Subnet#
-##############################
+################################################
+#Associação Tabela de Roteamento a Rede Privada#
+################################################
 
 resource "aws_route_table_association" "Assoc_2_Priv_a" {
 
@@ -175,12 +184,12 @@ resource "aws_route_table_association" "Assoc_2_Priv_c" {
 }
 
 #########################################################################    
-                        #NETWORK SECURITY#
+                    #CONFIGURAÇÃO DE SEGURAÇA DAS SUBNETES#
 #########################################################################
 
-################################
-#Grupos de Segurança Plublic SN#
-################################
+##################################
+#Grupos de Segurança Rede Publica#
+##################################
 
 resource "aws_security_group" "sg_vpc10_pub" {
 
@@ -221,13 +230,13 @@ resource "aws_security_group" "sg_vpc10_pub" {
     }
 
     tags = {
-        Name = "Security Group Public SN"
+        Name = "sg_vpc10_pub"
     }
 }
 
-################################
-#Grupos de Segurança Private SN#
-################################
+##################################
+#Grupos de Segurança Rede Privada#
+##################################
 
 resource "aws_security_group" "sg_vpc10_priv" {
 
@@ -252,32 +261,32 @@ resource "aws_security_group" "sg_vpc10_priv" {
     }
     
     tags = {
-        Name = "Security Group Private SN"
+        Name = "sg_vpc10_priv"
     }
 }
 
 #########################################################################    
-                        #CONFIG DATABASE#
+                #CONFIGURAÇÃO DO BANCO DE DADOS RDS#
 #########################################################################
 
 
-#########################
-#DATABASE - Subnet Group#
-#########################
+################################
+#Associação as Subnets Privadas#
+################################
 
-resource "aws_db_subnet_group" "sg_vpc10_rds"{
+resource "aws_db_subnet_group" "sg_vpc10_db_rds"{
 
     name       = "sg-vpc10-rds"
     subnet_ids = [ aws_subnet.sn_vpc10_priv_1a.id, aws_subnet.sn_vpc10_priv_1c.id ]
 
     tags = {
-        Name = "Subnet RDS to Priv Subnet AZ 1a - 1c"
+        Name = "sg_vpc10_rds"
     }
 }
 
-##############################
-##DATABASE - PARAMETER GROUP##
-##############################
+###################################
+##Parameter Group UTF8 para o PHP##
+###################################
 
 resource "aws_db_parameter_group" "pg_vpc10_db_rds" {
     name   = "pg-vpc10-db-rds"
@@ -296,7 +305,7 @@ resource "aws_db_parameter_group" "pg_vpc10_db_rds" {
 
 
 ###########################
-##DATABASE - INSTANCE RDS##
+##Criaçao da Instancia RDS#
 ###########################
 
 resource "aws_db_instance" "rds_db_notifier" {
@@ -312,22 +321,22 @@ resource "aws_db_instance" "rds_db_notifier" {
     username               = "admin"
     password               = "adminpwd"
     skip_final_snapshot    = true
-    db_subnet_group_name   = aws_db_subnet_group.sg_vpc10_rds.name
+    db_subnet_group_name   = aws_db_subnet_group.sg_vpc10_db_rds.name
     parameter_group_name   = aws_db_parameter_group.pg_vpc10_db_rds.name
     vpc_security_group_ids = [ aws_security_group.sg_vpc10_priv.id  ]
 
     tags = {
-        Name = "RDS Notifier"
+        Name = "rds_db_notifier"
     }
 }
 
 #########################################################################    
-                        #CONFIG EC2 APPLICATION PHP#
+                        #CONFIG EC2 APLICAÇÃO PHP#
 #########################################################################
 
-#######################
-##TEMPLATE CREATE EC2##
-#######################
+####################################################
+##Template para criação de novas instancias de EC2##
+####################################################S
 
 data "template_file" "user_data" {
     template = "${file(".script/userdata-notifier.sh")}"
@@ -335,7 +344,7 @@ data "template_file" "user_data" {
 
 
 resource "aws_launch_template" "lt_app_notify" {
-    name                   = "lt_app_notify"
+    name                   = "lt-app-notify"
     image_id               = "ami-02e136e904f3da870"
     instance_type          = "t2.micro"
     vpc_security_group_ids = [aws_security_group.sg_vpc10_pub.id]
@@ -357,69 +366,133 @@ resource "aws_launch_template" "lt_app_notify" {
 
 
 #########################################################################    
-                        #LOAD BALANCER AND AUTOSCALING#
+            #CONFIGURAÇÃO LOAD BALANCER E AUTOSCALING#
 #########################################################################
 
-#######################
-##CONFIG LOAD BALANCE##
-#######################
-resource "aws_lb" "lb_app_notify" {
-    name               = "lb-app-notify"
-    load_balancer_type = "application"
-    subnets            = [aws_subnet.sn_vpc10_pub_1a.id, aws_subnet.sn_vpc10_pub_1c.id]
-    security_groups    = [aws_security_group.sg_vpc10_pub.id]
+######################################################################
+##Criação do ELB e Associaçao do ELB as Subnets e Grupo de Segurança##
+######################################################################
+resource "aws_lb" "elb_ws" {
+    name               = "elb-ws"
+    load_balancer_type = "application" #Aplicação estará escutando na porta 80 exposto pelos Apaches
+    subnets            = [aws_subnet.sn_vpc10_pub_1a.id, aws_subnet.sn_vpc10_pub_1c.id] ##AZs Public Subnets
+    security_groups    = [aws_security_group.sg_vpc10_pub.id] ##SG das Subnets
+
     
     tags = {
-        Name = "lb_app_notify"
+        Name = "elb_ws"
     }
 }
 
+
+
 ############################
-#LOAD BALANCER TARGET GROUP#
+#Criação do Target Group####
 ############################
 
-resource "aws_lb_target_group" "tg_app_notify" {
+resource "aws_lb_target_group" "tg_elb_ws" {
     vpc_id   = aws_vpc.vpc10.id
     
-    name     = "tg-app-notify"
+    name     = "tg-elb-ws"
     protocol = "HTTP"
     port     = "80"
 
+    health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 3
+    port                = 80
+    interval            = 10
+
+    }
+
     tags = {
-        Name = "tg_app_notify"
+        Name = "tg_elb_ws"
     }
 }
 
-################################
-#LOAD BALANCER LISTENER PORT 80#
-################################
+##########################
+#Config Listener Porta 80#
+##########################
 
-resource "aws_lb_listener" "listener_app_notify" {
-    load_balancer_arn = aws_lb.lb_app_notify.arn
+resource "aws_lb_listener" "listener_elb_ws" {
+    load_balancer_arn = aws_lb.elb_ws.arn
     protocol          = "HTTP"
     port              = "80"
     
     default_action {
         type             = "forward"
-        target_group_arn = aws_lb_target_group.tg_app_notify.arn
+        target_group_arn = aws_lb_target_group.tg_elb_ws.arn
     }
 }
 
-####################
-#AUTO SCALING GROUP#
-####################
+########################
+#Criação do AutoScaling#
+########################
 
-resource "aws_autoscaling_group" "asg_app_notify" {
-    name                = "asg_app_notify"
+resource "aws_autoscaling_group" "asg_ws" {
+    name                = "asg-ws"
     vpc_zone_identifier = [aws_subnet.sn_vpc10_pub_1a.id, aws_subnet.sn_vpc10_pub_1c.id]
     desired_capacity    = "2"
     min_size            = "1"
     max_size            = "4"
-    target_group_arns   = [aws_lb_target_group.tg_app_notify.arn]
+    target_group_arns   = [aws_lb_target_group.tg_elb_ws.arn]
 
     launch_template {
         id      = aws_launch_template.lt_app_notify.id
         version = "$Latest"
     }
    
+}
+
+
+#########################################################################    
+            #CONFIGURAÇÃO VPC ENDPOINT#
+#########################################################################
+
+resource "aws_vpc_endpoint" "vpc_ep_vpc10" {
+  vpc_id            = aws_vpc.vpc10.id
+  service_name      = "com.amazonaws.us-east-1.sns"
+  vpc_endpoint_type = "Interface"
+  security_group_ids    = [aws_security_group.sg_vpc10_pub.id] ##SG AutoScaling
+
+  private_dns_enabled = true
+
+  tags = {
+        Name = "vpc_ep_vpc10"
+    }
+}
+#########################################################################    
+                        #CONFIGURAÇÃO SNS#
+#########################################################################
+locals {
+  phone_numbers = ["+5511911112222"] ##Array para testar numero
+}
+
+resource "aws_sns_topic" "sn_app" {
+  name            = "sn-app"
+  delivery_policy = jsonencode({  ##Policy para envio do SMS
+    "http" : {
+      "defaultHealthyRetryPolicy" : {
+        "minDelayTarget" : 20,
+        "maxDelayTarget" : 20,
+        "numRetries" : 3,
+        "numMaxDelayRetries" : 0,
+        "numNoDelayRetries" : 0,
+        "numMinDelayRetries" : 0,
+        "backoffFunction" : "linear"
+      },
+      "disableSubscriptionOverrides" : false,
+      "defaultThrottlePolicy" : {
+        "maxReceivesPerSecond" : 1
+      }
+    }
+  })
+}
+
+resource "aws_sns_topic_subscription" "topic_sms_subscription" {
+  count     = length(local.phone_numbers) ##Valida quantidade de campos
+  topic_arn = aws_sns_topic.sn_app.arn
+  protocol  = "sms"
+  endpoint  = local.phone_numbers[count.index] ##Chamada do Array
 }
