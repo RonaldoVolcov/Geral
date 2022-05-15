@@ -44,18 +44,22 @@ resource "aws_internet_gateway" "igw_vpc10" {
     }
 }
 
-#########################
-#Criação Subnet Publicas#
-#########################
+#########################################################################    
+                #FORMATION OF PRIVATE AND PUBLIC SUBNETS#
+#########################################################################
+
+######################
+#CREATE PUBLIC SUBNET#
+######################
 
 resource "aws_subnet" "sn_vpc10_pub_1a" {
     vpc_id                  = aws_vpc.vpc10.id
     cidr_block              = "10.0.1.0/24"
     map_public_ip_on_launch = "true"
-    availability_zone       = "us-east-1a"
+    availability_zone       = "us-east-1a" ##AZ
 
     tags = {
-        Name = "Public Subnet East 1A"
+        Name = "Public Subnet East 1A" 
     }
 }
 
@@ -63,23 +67,27 @@ resource "aws_subnet" "sn_vpc10_pub_1c" {
     vpc_id                  = aws_vpc.vpc10.id
     cidr_block              = "10.0.2.0/24"
     map_public_ip_on_launch = "true"
-    availability_zone       = "us-east-1c"
+    availability_zone       = "us-east-1c" ##AZ
 
     tags = {
         Name = "Public Subnet East 1C"
     }
 }
 
+#########################################################################    
+                #FORMATION OF PRIVATE AND PUBLIC SUBNETS#
+#########################################################################
 
-########################
-#Criação Subnet Privada#
-########################
+
+#######################
+#CREATE PRIVATE SUBNET#
+#######################
 
 resource "aws_subnet" "sn_vpc10_priv_1a" {
     vpc_id                  = aws_vpc.vpc10.id
     cidr_block              = "10.0.3.0/24"
     map_public_ip_on_launch = "true"
-    availability_zone       = "us-east-1a"
+    availability_zone       = "us-east-1a" ##AZ
 
     tags = {
         Name = "Private Subnet East 1A"
@@ -90,18 +98,20 @@ resource "aws_subnet" "sn_vpc10_priv_1c" {
     vpc_id                  = aws_vpc.vpc10.id
     cidr_block              = "10.0.4.0/24"
     map_public_ip_on_launch = "true"
-    availability_zone       = "us-east-1c"
+    availability_zone       = "us-east-1c" ##AZ
 
     tags = {
         Name = "Private Subnet East 1C"
     }
 }
 
+#########################################################################    
+                #FORMATION OF ROUTE TABLES SUBNETS#
+#########################################################################
 
-
-############################
-#Criação Public Route Table#
-############################
+###########################
+#CREATE PUBLIC ROUTE TABLE#
+###########################
 
 resource "aws_route_table" "Public_Route_Table" {
     vpc_id = aws_vpc.vpc10.id
@@ -116,9 +126,9 @@ resource "aws_route_table" "Public_Route_Table" {
     }
 }
 
-#############################
-#Criação Private Route Table#
-#############################
+############################
+#CREATE PRIVATE ROUTE TABLE#
+############################
 
 resource "aws_route_table" "Private_Route_Table" {
     vpc_id = aws_vpc.vpc10.id
@@ -163,6 +173,10 @@ resource "aws_route_table_association" "Assoc_2_Priv_c" {
   route_table_id = aws_route_table.Private_Route_Table.id
 
 }
+
+#########################################################################    
+                        #NETWORK SECURITY#
+#########################################################################
 
 ################################
 #Grupos de Segurança Plublic SN#
@@ -311,7 +325,10 @@ resource "aws_db_instance" "rds_db_notifier" {
                         #CONFIG EC2 APPLICATION PHP#
 #########################################################################
 
-# EC2 LAUNCH TEMPLATE
+#######################
+##TEMPLATE CREATE EC2##
+#######################
+
 data "template_file" "user_data" {
     template = "${file(".script/userdata-notifier.sh")}"
 }
@@ -338,7 +355,14 @@ resource "aws_launch_template" "lt_app_notify" {
     }
 }
 
-# APPLICATION LOAD BALANCER
+
+#########################################################################    
+                        #LOAD BALANCER AND AUTOSCALING#
+#########################################################################
+
+#######################
+##CONFIG LOAD BALANCE##
+#######################
 resource "aws_lb" "lb_app_notify" {
     name               = "lb-app-notify"
     load_balancer_type = "application"
@@ -350,7 +374,10 @@ resource "aws_lb" "lb_app_notify" {
     }
 }
 
-# APPLICATION LOAD BALANCER TARGET GROUP
+############################
+#LOAD BALANCER TARGET GROUP#
+############################
+
 resource "aws_lb_target_group" "tg_app_notify" {
     vpc_id   = aws_vpc.vpc10.id
     
@@ -363,7 +390,10 @@ resource "aws_lb_target_group" "tg_app_notify" {
     }
 }
 
-# APPLICATION LOAD BALANCER LISTENER
+################################
+#LOAD BALANCER LISTENER PORT 80#
+################################
+
 resource "aws_lb_listener" "listener_app_notify" {
     load_balancer_arn = aws_lb.lb_app_notify.arn
     protocol          = "HTTP"
@@ -375,7 +405,10 @@ resource "aws_lb_listener" "listener_app_notify" {
     }
 }
 
-# AUTO SCALING GROUP
+####################
+#AUTO SCALING GROUP#
+####################
+
 resource "aws_autoscaling_group" "asg_app_notify" {
     name                = "asg_app_notify"
     vpc_zone_identifier = [aws_subnet.sn_vpc10_pub_1a.id, aws_subnet.sn_vpc10_pub_1c.id]
