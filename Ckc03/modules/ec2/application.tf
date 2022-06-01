@@ -133,7 +133,7 @@ resource "aws_lb" "elb-ws" {
 ####################################################S
 
 data "template_file" "user_data" {
-    template = "${file("./ec2/script/userdata-notifier.sh")}"
+    template = "${file("./modules/ec2/script/userdata-notifier.sh")}"
 vars = {
         rds_endpoint = "${var.rds_endpoint}"
         rds_user     = "${var.rds_user}"
