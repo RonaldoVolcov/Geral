@@ -1,0 +1,26 @@
+kubectl cluster-info --context kind-fullcycle
+
+kubectl port-forward pod/goserver 80:80
+kubectl describe pod <pod name>
+kubectl get replicasets
+kubectl describe deployment goserver
+
+LoadBalance
+kubectl describe deployment goserver
+
+##Rollback Deployment/Replicaset##
+kubectl rollout history deployment goserve
+kubectl rollout undo deployment goserver --to-revision=
+
+Verificar API K8S
+kubectl proxy --port=8080
+
+
+docker login -u volcov86
+16beea13-a44f-4772-91c9-c284cd079824
+
+When you build them, using docker build -t <hub-user>/<repo-name>[:<tag>]
+By re-tagging an existing local image docker tag <existing-image> <hub-user>/<repo-name>[:<tag>]
+By using docker commit <existing-container> <hub-user>/<repo-name>[:<tag>] to commit changes
+
+ docker push <hub-user>/<repo-name>:<tag>
