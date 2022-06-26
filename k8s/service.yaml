@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: goserver-service
+spec:
+  selector: #filtrar os pods que ele irá selecionar
+    app: goserver #verifica o matchlabels no deployments goserver
+  #type: ClusterIP # há 4 NodePort, LoadBalance, ClusterIP, Headless Service
+  #type: NodePort # Expor porta para acessar a API
+  type: LoadBalancer # Gera um IP externo e NodePort (auto)
+  ports:
+  - name: goserver-service
+    port: 80 # Service
+    targetPort: 8000 #Container
+    protocol: TCP
+    #nodePort: 30001 #30000 - 32767
