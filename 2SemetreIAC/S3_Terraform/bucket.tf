@@ -38,5 +38,5 @@ resource "aws_s3_bucket" "demoS3" {
 ##Config ACL
 
 resource "aws_s3_bucket" "demoS3" {
-    acl = "public"
+    acl = "public-read"
 }
