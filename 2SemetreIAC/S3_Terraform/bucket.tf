@@ -29,14 +29,41 @@ provider "aws" {
     shared_credentials_file = ".aws/credentials"
 }
 
-#Criação do Bucket S3
 
-resource "aws_s3_bucket" "demoS3" {
-  bucket = " Teste criação bucket S3"
+########################
+# Bucket creation
+########################
+
+resource "aws_s3_bucket" "testetfs3" {
+  bucket = "${var.bucket_name}"
+
+  website {
+    index_document = "index.html"
+    error_document = "error.html"
+  }
 }
 
-##Config ACL
+##########################
+# Bucket private access
+##########################
+resource "aws_s3_bucket_acl" "testetfs3_acl" {
+  bucket = aws_s3_bucket.testetfs3.id
+  acl    = "public-read"
 
-resource "aws_s3_bucket" "demoS3" {
-    acl = "public-read"
+}
+
+#############################
+# Enable bucket versioning
+#############################
+resource "aws_s3_bucket_versioning" "testetfs3_versioning" {
+  bucket = aws_s3_bucket.testetfs3.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_object" "object1" {
+  bucket = aws_s3_bucket.testetfs3.id
+  key    = "someobject"
+  source = "index.html"
 }
