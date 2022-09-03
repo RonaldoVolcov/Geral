@@ -25,8 +25,14 @@ terraform {
 provider "aws" {
     #region                  = "${var.aws_region}"
     #shared_credentials_file = "${var.credential_file}"
-    region                  = "us-east-1"
+    region = "us-east-1"
     shared_credentials_file = ".aws/credentials"
+}
+
+variable "website_root" {
+  type        = string
+  description = "Path to the root of website content"
+  default     = "./data"
 }
 
 
@@ -37,9 +43,18 @@ provider "aws" {
 resource "aws_s3_bucket" "testetfs3" {
   bucket = "${var.bucket_name}"
 
-  website {
-    index_document = "index.html"
-    error_document = "error.html"
+}
+
+resource "aws_s3_bucket_website_configuration" "testetfs3" {
+
+  bucket = aws_s3_bucket.testetfs3.id
+
+  index_document {
+    suffix = "index.html"
+  }
+
+  error_document {
+    key = "error.html"
   }
 }
 
@@ -62,8 +77,22 @@ resource "aws_s3_bucket_versioning" "testetfs3_versioning" {
   }
 }
 
-resource "aws_s3_bucket_object" "object1" {
-  bucket = aws_s3_bucket.testetfs3.id
-  key    = "someobject"
-  source = "index.html"
+#resource "aws_s3_bucket_object" "object1" {
+#  bucket = aws_s3_bucket.testetfs3.id
+#  key    = "someobject"
+#  source = "index.html"
+#}
+
+resource "aws_s3_bucket_object" "file" {
+  for_each = fileset(var.website_root, "**")
+
+  bucket      = aws_s3_bucket.testetfs3.id
+  key         = each.key
+  source      = "${var.website_root}/${each.key}"
+  source_hash = filemd5("${var.website_root}/${each.key}")
+  acl         = "public-read"
+}
+
+output "website_endpoint" {
+  value = aws_s3_bucket.testetfs3.website_endpoint
 }
